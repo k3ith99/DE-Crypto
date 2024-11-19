@@ -10,6 +10,8 @@ numpy = "*"
 pep8 = "*"
 requests = "*"
 jupyterlab = "*"
+black = {extras = ["jupyter"], version = "*"}
+jupyter-black = "*"
 
 [dev-packages]
 
