@@ -9,8 +9,14 @@ pyspark = "*"
 numpy = "*"
 pep8 = "*"
 requests = "*"
+jupyterlab = "*"
+black = {extras = ["jupyter"], version = "*"}
+jupyter-black = "*"
+pycodestyle = "*"
+pycodestyle-magic = "*"
+flake8 = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
