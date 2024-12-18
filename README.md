@@ -6,7 +6,7 @@
 ## Installation & Usage
 
 ## Design & Implementation
-### [Schema] (https://dbdiagram.io/d/DE-Crypto-6762e4b084c741072719d5dd)
+[Schema] (https://dbdiagram.io/d/DE-Crypto-6762e4b084c741072719d5dd)
 
 
 
