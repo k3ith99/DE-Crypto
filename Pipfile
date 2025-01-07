@@ -15,6 +15,7 @@ jupyter-black = "*"
 pycodestyle = "*"
 pycodestyle-magic = "*"
 flake8 = "*"
+psycopg2 = "*"
 
 [dev-packages]
 
