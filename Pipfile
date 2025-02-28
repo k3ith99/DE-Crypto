@@ -20,6 +20,7 @@ pipenv = "*"
 shell = "*"
 pandas = "*"
 python-dotenv = "*"
+minio = "*"
 
 [dev-packages]
 
