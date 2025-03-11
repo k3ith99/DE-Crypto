@@ -140,7 +140,7 @@ def minio_pipeline_monthly(symbol):
     ]
     data = get_data_monthly(symbol = symbol,interval = '1M',start_date = "01-01-2019",end_date = "31-12-2024")
     df_monthly = spark_df_monthly(data,columns)
-    upload_minio(minio_url = 'localhost:9000',minio_user = MINIO_USER ,minio_password = MINIO_PASSWORD ,symbol = symbol ,bucket_name = 'bucket1',timeframe='Monthly',df = df_monthly)
+    upload_minio(minio_url = 'localhost:9000',minio_user = MINIO_USER ,minio_password = MINIO_PASSWORD ,symbol = symbol ,bucket_name = 'binance_data',timeframe='Monthly',df = df_monthly)
     return "Successfully ran monthly pipeline to minio"
     #implement try and except, api codes from minio and binance
     #implement schema check
