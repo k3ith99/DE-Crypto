@@ -7,19 +7,17 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    env_file:
+      - ../.env
     command: server /data --console-address ":9001"
+
   minio-client:
     image: minio/mc
     container_name: minio-client
     ports:
       - 9003:9003
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      ADDRESS: ${ADDRESS}
+    env_file:
+      - ../.env
     depends_on:
       - minio
     volumes:

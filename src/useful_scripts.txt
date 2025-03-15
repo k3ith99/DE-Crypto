@@ -1,1 +1,6 @@
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres1
+
+curl -O https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar
+curl -O https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar 
+cd /Users/hamza/.local/share/virtualenvs/DE-Crypto-aeKJmBel/lib/python3.9/site-packages/pyspark/jars/
+cd pyspark/jars && ls -l | grep hadoop 
