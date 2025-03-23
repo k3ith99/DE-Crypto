@@ -14,8 +14,9 @@ from binance.helpers import date_to_milliseconds, interval_to_milliseconds
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 import time
-load_dotenv()
+load_dotenv(dotenv_path="./main.env", override=True)
 
+#load_dotenv()
 API_KEY = os.getenv("API_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY")
 MINIO_USER = os.getenv("MINIO_ROOT_USER")
@@ -29,7 +30,7 @@ spark = SparkSession.builder \
 sc = spark.sparkContext
 sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", MINIO_USER)#turn into access key in the future 
 sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", MINIO_PASSWORD)
-sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "http://localhost:9000")
+sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "http://minio:9000")
 sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "true")
 sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
 sc._jsc.hadoopConfiguration().set("fs.s3a.attempts.maximum", "1")
@@ -140,7 +141,7 @@ def minio_pipeline_monthly(symbol):
     ]
     data = get_data_monthly(symbol = symbol,interval = '1M',start_date = "01-01-2019",end_date = "31-12-2024")
     df_monthly = spark_df_monthly(data,columns)
-    upload_minio(minio_url = 'localhost:9000',minio_user = MINIO_USER ,minio_password = MINIO_PASSWORD ,symbol = symbol ,bucket_name = 'binance_data',timeframe='Monthly',df = df_monthly)
+    upload_minio(minio_url = 'localhost:9000',minio_user = MINIO_USER ,minio_password = MINIO_PASSWORD ,symbol = symbol ,bucket_name = 'binancedata',timeframe='Monthly',df = df_monthly)
     return "Successfully ran monthly pipeline to minio"
     #implement try and except, api codes from minio and binance
     #implement schema check
