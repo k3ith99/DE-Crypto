@@ -11,14 +11,11 @@ from datetime import datetime, date
 import os
 from dotenv import load_dotenv, dotenv_values
 from binance.helpers import date_to_milliseconds, interval_to_milliseconds
-from binance.exceptions import BinanceRequestException, BinanceAPIException
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 import time
-import logging
-load_dotenv(dotenv_path="./main.env", override=True)
+load_dotenv()
 
-#load_dotenv()
 API_KEY = os.getenv("API_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY")
 MINIO_USER = os.getenv("MINIO_ROOT_USER")
@@ -32,21 +29,13 @@ spark = SparkSession.builder \
 sc = spark.sparkContext
 sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", MINIO_USER)#turn into access key in the future 
 sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", MINIO_PASSWORD)
-sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "http://minio:9000")
+sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "http://localhost:9000")
 sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "true")
 sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
 sc._jsc.hadoopConfiguration().set("fs.s3a.attempts.maximum", "1")
 sc._jsc.hadoopConfiguration().set("fs.s3a.connection.establish.timeout", "5000")
 sc._jsc.hadoopConfiguration().set("fs.s3a.connection.timeout", "10000")
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG) #set to debug to capture all levels
-if logger.hasHandlers():
-    logger.handlers.clear()
-logger.propagate = False
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-logger.addHandler(handler)
 # tickers = client.get_all_tickers()
 #client_binance.get_exchange_info() #has rate limit info
 #client_binance.response.headers #has info on current usage
@@ -79,9 +68,6 @@ def get_data_monthly(symbol,interval,start_date,end_date):
             )
             output +=data
             #timeframe = interval_to_milliseconds(interval)
-            if not data:
-                logger.error(f"No data returned for {symbol} from {start_date} to {end_date}")
-                return None
             last_date = data[-1][0]
             #get month and year from last date and compare with end_date month and year
             last_datetime = datetime.utcfromtimestamp(last_date / 1000)
@@ -91,21 +77,13 @@ def get_data_monthly(symbol,interval,start_date,end_date):
                 break
             start_datetime =  last_datetime + relativedelta(months=1)
             start_date = str(start_datetime)
-            logger.info(client_binance.response.headers['x-mbx-used-weight'])
+            print(client_binance.response.headers['x-mbx-used-weight'])
             #for daily add sleep function
             if client_binance.response.headers['x-mbx-used-weight'] == 5000:
                 time.sleep(10)
-                logger.info("sleeping due to hitting rate limit")
         return output
-    except BinanceAPIException as e:
-        logger.error(f"order issue:{e}", stack_info=True, exc_info=True)
-        return None
-    except BinanceRequestException as e:
-        logger.error(f"Network issue: {e}", stack_info=True, exc_info=True)
-        return None
     except Exception as e:
-        logger.error(e,stack_info=True,exc_info = True)
-        return None
+        print("An exception occurred:", type(e).__name__, "–", e)
 columns = [
     "Kline open time",
     "Open Price",
@@ -123,36 +101,27 @@ columns = [
 
 def spark_df_monthly(output,columns):
     #implement schema check
-    try:
-        dataframe = spark.createDataFrame(output, columns)
-        df = dataframe.withColumn("Kline open time", to_timestamp(col("Kline open time") / 1000))
-        df = df.withColumnRenamed("Kline open time","datetime")
-        df = df.select('datetime','Open Price','Close Price','Volume')
-        df = df.withColumn("year", year(df["datetime"])) \
-           .withColumn("month", month(df["datetime"]))
-        logger.info(df.head(5))
-        return df
-    except Exception as e:
-        logger.error(e,stack_info = True, exc_info = True)
-        return None
+    dataframe = spark.createDataFrame(output, columns)
+    df = dataframe.withColumn("Kline open time", to_timestamp(col("Kline open time") / 1000))
+    df = df.withColumnRenamed("Kline open time","datetime")
+    df = df.select('datetime','Open Price','Close Price','Volume')
+    df = df.withColumn("year", year(df["datetime"])) \
+       .withColumn("month", month(df["datetime"]))
+    return df
 
 def upload_minio(minio_url,minio_user,minio_password,symbol,bucket_name,timeframe,df):
-    try:
-        client_minio = Minio(
-        #"localhost:9000",  # Make sure you're using port 9000 for the S3 API
-        minio_url,
-        access_key = minio_user,
-        secret_key = minio_password,
-        secure=False  # Disable SSL if you're not using SSL certificates
-        )
-        df.write.mode("append") \
-        .partitionBy("year", "month") \
-        .parquet(f"s3a://{bucket_name}/{symbol}/{timeframe}")
-        return f"Successfully {symbol} {timeframe} uploaded to minio"
-    except Exception as e:
-        logger.error(e,stack_info = True, exc_info = True)
-        
-    
+    pass
+    client_minio = Minio(
+    #"localhost:9000",  # Make sure you're using port 9000 for the S3 API
+    minio_url,
+    access_key = minio_user,
+    secret_key = minio_password,
+    secure=False  # Disable SSL if you're not using SSL certificates
+    )
+    df.write.mode("append") \
+    .partitionBy("year", "month") \
+    .parquet(f"s3a://{bucket_name}/{symbol}/{timeframe}")
+    return f"Successfully {symbol} {timeframe} uploaded to minio"
 
 def minio_pipeline_monthly(symbol):
     columns = [
@@ -171,7 +140,7 @@ def minio_pipeline_monthly(symbol):
     ]
     data = get_data_monthly(symbol = symbol,interval = '1M',start_date = "01-01-2019",end_date = "31-12-2024")
     df_monthly = spark_df_monthly(data,columns)
-    upload_minio(minio_url = 'localhost:9000',minio_user = MINIO_USER ,minio_password = MINIO_PASSWORD ,symbol = symbol ,bucket_name = 'binancedata',timeframe='Monthly',df = df_monthly)
+    upload_minio(minio_url = 'localhost:9000',minio_user = MINIO_USER ,minio_password = MINIO_PASSWORD ,symbol = symbol ,bucket_name = 'binance_data',timeframe='Monthly',df = df_monthly)
     return "Successfully ran monthly pipeline to minio"
     #implement try and except, api codes from minio and binance
     #implement schema check
@@ -181,6 +150,6 @@ def main():
         try:
             minio_pipeline_monthly(symbol)
         except Exception as e:
-            logger.error(f"Error processing minio monthly pipeline: {e}", stack_info=True, exc_info=True)
+            print(f"Error processing {symbol}: {e}")
 if __name__ == "__main__":
     main()

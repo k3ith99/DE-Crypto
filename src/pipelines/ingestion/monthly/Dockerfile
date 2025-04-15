@@ -1,4 +1,4 @@
-FROM python:3.9-bullseye as spark_crypto
+FROM python:3.9-bullseye 
 
 
 ARG SPARK_VERSION=3.5.4
