@@ -4,12 +4,23 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pandas = "*"
 pyspark = "*"
 numpy = "*"
 pep8 = "*"
 requests = "*"
 jupyterlab = "*"
+black = {extras = ["jupyter"], version = "*"}
+jupyter-black = "*"
+pycodestyle = "*"
+pycodestyle-magic = "*"
+flake8 = "*"
+psycopg2 = "*"
+python-binance = "*"
+pipenv = "*"
+shell = "*"
+pandas = "*"
+python-dotenv = "*"
+minio = "*"
 
 [dev-packages]
 
