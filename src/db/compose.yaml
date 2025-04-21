@@ -1,0 +1,24 @@
+version: '1.0'
+services:
+  postgresql:
+    image: postgres:14.15
+    container_name: postgres1
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - ../.env
+    volumes:
+      - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin1
+    restart: always
+    ports:
+      - 5050:80
+    env_file:
+      - ../.env
+
+
+        
+
