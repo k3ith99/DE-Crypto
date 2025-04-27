@@ -29,7 +29,8 @@ RUN pip install -r requirements.txt
 #move into jar the pyspark jar stuff
 RUN cd /usr/local/lib/python3.9/site-packages/pyspark/jars && \
     curl -O https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar && \
-    curl -O https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar
+    curl -O https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
+    curl -O https://jdbc.postgresql.org/download/postgresql-42.7.5.jar
 
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
 CMD ["python", "monthly_transform.py"]
