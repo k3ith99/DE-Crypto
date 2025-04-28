@@ -18,8 +18,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 import time
 import logging
-import psycopg2
-load_dotenv()
+load_dotenv(dotenv_path="./main.env", override=True)
 
 API_KEY = os.getenv("API_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -29,12 +28,13 @@ client_binance = Client(API_KEY, SECRET_KEY)
 
 spark = SparkSession.builder \
     .appName("CryptoETL") \
+    .config("spark.jars", "/usr/local/lib/python3.9/site-packages/pyspark/jars/postgresql-42.7.5.jar") \
     .getOrCreate()
 # Get the SparkContext from the SparkSession
 sc = spark.sparkContext
 sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", MINIO_USER)#turn into access key in the future 
 sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", MINIO_PASSWORD)
-sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "http://localhost:9000")
+sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", "http://minio:9000")
 sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "true")
 sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
 sc._jsc.hadoopConfiguration().set("fs.s3a.attempts.maximum", "1")
@@ -51,7 +51,7 @@ handler.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 client_minio = Minio(
-        "localhost:9000",  # Make sure you're using port 9000 for the S3 API
+        "minio:9000",  # Make sure you're using port 9000 for the S3 API
         #minio_url,
         access_key = MINIO_USER,
         secret_key = MINIO_PASSWORD,
@@ -64,12 +64,15 @@ schema = StructType([\
                     StructField(name= 'Close Price',dataType = DecimalType(),nullable =False), \
                     StructField(name= 'Volume',dataType = DecimalType(),nullable = False)\
                                 ])
+#doesnt work for parquet files, schema inferred from that instead
 
 def parquet_to_df(client,crypto,schema):
     #read from parquet from minio and combines into dataframe
     try:
+        logger.info("Trying to get info from minio")
         objects = client.list_objects("binancedata", prefix=crypto, recursive=True)
         filenames = [obj.object_name for obj in objects]
+        logger.info(filenames)
         filenames = [f for f in filenames if "_SUCCESS" not in f]
         df = spark.createDataFrame(data = [],schema = schema)
         for file in filenames:
@@ -87,7 +90,7 @@ def data_cleaning(df):
                                 'Volume':'volume'})
         df_duplicated = df_renamed.dropDuplicates()
         for column in ["open", "close", "volume"]:
-            df_duplicated = df_duplicated.withColumn(column, col(column).cast(IntegerType()))
+            df_duplicated = df_duplicated.withColumn(column, col(column).cast(DecimalType()))
         return df_duplicated
     except Exception as e:
         logger.error(f"Error cleaning data:{e}",stack_info=True,exc_info=True)
@@ -95,7 +98,7 @@ def data_cleaning(df):
 read_sql = "SELECT * FROM crypto"
 df_crypto = spark.read \
     .format("jdbc") \
-    .option("url", "jdbc:postgresql://localhost:5432/crypto") \
+    .option("url", "jdbc:postgresql://postgres1:5432/crypto") \
     .option("user", "postgres") \
     .option("password", "postgres") \
     .option("query", read_sql)\
@@ -137,7 +140,7 @@ def upload_time(df):
     try:
         df_time.write \
         .format("jdbc") \
-        .option("url", "jdbc:postgresql://localhost:5432/crypto") \
+        .option("url", "jdbc:postgresql://postgres1:5432/crypto") \
         .option("dbtable", "time") \
         .option("user", "postgres") \
         .option("password", "postgres") \
@@ -153,7 +156,7 @@ def upload_price(df):
     try:
         df_filtered.write \
         .format("jdbc") \
-        .option("url", "jdbc:postgresql://localhost:5432/crypto") \
+        .option("url", "jdbc:postgresql://postgres1:5432/crypto") \
         .option("dbtable", "price") \
         .option("user", "postgres") \
         .option("password", "postgres") \
