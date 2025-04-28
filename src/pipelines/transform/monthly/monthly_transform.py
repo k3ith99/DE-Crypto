@@ -51,7 +51,7 @@ handler.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 client_minio = Minio(
-        "172.19.0.2:9000",  # Make sure you're using port 9000 for the S3 API
+        "minio:9000",  # Make sure you're using port 9000 for the S3 API
         #minio_url,
         access_key = MINIO_USER,
         secret_key = MINIO_PASSWORD,
@@ -64,10 +64,12 @@ schema = StructType([\
                     StructField(name= 'Close Price',dataType = DecimalType(),nullable =False), \
                     StructField(name= 'Volume',dataType = DecimalType(),nullable = False)\
                                 ])
+#doesnt work for parquet files, schema inferred from that instead
 
 def parquet_to_df(client,crypto,schema):
     #read from parquet from minio and combines into dataframe
     try:
+        logger.info("Trying to get info from minio")
         objects = client.list_objects("binancedata", prefix=crypto, recursive=True)
         filenames = [obj.object_name for obj in objects]
         logger.info(filenames)
@@ -87,8 +89,8 @@ def data_cleaning(df):
                                 'Close Price':'close',
                                 'Volume':'volume'})
         df_duplicated = df_renamed.dropDuplicates()
-        '''for column in ["open", "close", "volume"]:
-            df_duplicated = df_duplicated.withColumn(column, col(column).cast(IntegerType()))'''
+        for column in ["open", "close", "volume"]:
+            df_duplicated = df_duplicated.withColumn(column, col(column).cast(DecimalType()))
         return df_duplicated
     except Exception as e:
         logger.error(f"Error cleaning data:{e}",stack_info=True,exc_info=True)
