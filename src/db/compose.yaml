@@ -32,6 +32,7 @@ services:
       - ../.env
     volumes:
       - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+      - postgres_data:/var/lib/postgresql/data
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin1
@@ -46,6 +47,20 @@ services:
     restart: always
     ports:
       - 3000:3000
+    env_file:
+      - ../.env
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase              # Replace with your actual DB name if different
+      MB_DB_PORT: 5432
+      MB_DB_USER: metabase                # Replace with your actual DB user if different
+      MB_DB_PASS: metabasepass            # Replace with your actual DB password
+      MB_DB_HOST: postgresql
+    depends_on:
+      - postgresql
+
+volumes:
+  postgres_data:
       
 
     
