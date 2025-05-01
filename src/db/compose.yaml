@@ -53,14 +53,18 @@ services:
       MB_DB_TYPE: postgres
       MB_DB_DBNAME: metabase              # Replace with your actual DB name if different
       MB_DB_PORT: 5432
-      MB_DB_USER: metabase                # Replace with your actual DB user if different
-      MB_DB_PASS: metabasepass            # Replace with your actual DB password
+      MB_DB_USER: postgres                # Replace with your actual DB user if different
+      MB_DB_PASS: postgres            # Replace with your actual DB password
       MB_DB_HOST: postgresql
     depends_on:
       - postgresql
+    volumes:
+      - metabase_data:/metabase-data
 
 volumes:
   postgres_data:
+  metabase_data:
+
       
 
     

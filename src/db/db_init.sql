@@ -4,8 +4,8 @@ BEGIN
         CREATE DATABASE crypto;
     END IF;
 END $$;
-
 \c crypto;
+
 
 CREATE TABLE IF NOT EXISTS crypto (
   id SERIAL PRIMARY KEY,
@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS price (
   FOREIGN KEY (time_id) REFERENCES time (id),
   UNIQUE (crypto_id, time_id)  -- Optional: prevents duplicate entries for same crypto and time
 );
+
 
 INSERT INTO crypto (name, ticker)
 VALUES 
