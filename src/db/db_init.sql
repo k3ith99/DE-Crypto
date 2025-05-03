@@ -43,6 +43,6 @@ VALUES
   ('Bitcoin', 'BTC'),
   ('Ethereum', 'ETH'),
   ('Litecoin', 'LTC'),
-  ('Dogecoin', 'DOGE'),
+  ('XRP Ledger', 'XRP'),
   ('BNB', 'BNB')
   ON CONFLICT (ticker) DO NOTHING;

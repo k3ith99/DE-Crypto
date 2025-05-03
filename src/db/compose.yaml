@@ -10,6 +10,8 @@ services:
     env_file:
       - ../.env
     command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
   minio-client:
     image: minio/mc
     container_name: minio-client
@@ -65,6 +67,7 @@ services:
 volumes:
   postgres_data:
   metabase_data:
+  minio_data:
 
       
 

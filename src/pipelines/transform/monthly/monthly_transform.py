@@ -89,8 +89,11 @@ def data_cleaning(df):
                                 'Close Price':'close',
                                 'Volume':'volume'})
         df_duplicated = df_renamed.dropDuplicates()
-        for column in ["open", "close", "volume"]:
-            df_duplicated = df_duplicated.withColumn(column, col(column).cast(DecimalType()))
+        logger.info(df_duplicated.show())
+        df_duplicated = df_duplicated.withColumn("open", col("open").cast(DecimalType(10, 5))) \
+                             .withColumn("close", col("close").cast(DecimalType(10, 5))) \
+                             .withColumn("volume", col("volume").cast(DecimalType(20, 5)))
+
         return df_duplicated
     except Exception as e:
         logger.error(f"Error cleaning data:{e}",stack_info=True,exc_info=True)
@@ -153,6 +156,7 @@ def upload_time(df):
 
 def upload_price(df):
     df_filtered = df.select(['crypto_id','time_id','open','close','volume'])
+    logger.info(df_filtered.show())
     try:
         df_filtered.write \
         .format("jdbc") \
@@ -172,11 +176,13 @@ def monthly_transform(symbol,currency):
     df_cleaned = data_cleaning(df)
     df_id = add_crypto_id(df_cleaned,df_crypto,symbol,currency)
     df_time_id =add_time_id(generate_time_id,df_id)
+    logger.info(df_time_id.show())
     upload_time(df_time_id)
     upload_price(df_time_id)
     logger.info(f"Data successfully transformed and loaded for {symbol}")
 def main():
-    cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','DOGEUSDT']
+    cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','XRPUSDT']
+    
     for symbol in cryptos:
         try:
             monthly_transform(symbol = symbol,currency = "USDT")
