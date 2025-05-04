@@ -72,7 +72,7 @@ def parquet_to_df(client,crypto,schema):
         logger.info("Trying to get info from minio")
         objects = client.list_objects("binancedata", prefix=crypto, recursive=True)
         filenames = [obj.object_name for obj in objects]
-        logger.info(filenames)
+        #logger.info(filenames)
         filenames = [f for f in filenames if "_SUCCESS" not in f]
         df = spark.createDataFrame(data = [],schema = schema)
         for file in filenames:
@@ -89,7 +89,6 @@ def data_cleaning(df):
                                 'Close Price':'close',
                                 'Volume':'volume'})
         df_duplicated = df_renamed.dropDuplicates()
-        logger.info(df_duplicated.show())
         df_duplicated = df_duplicated.withColumn("open", col("open").cast(DecimalType(10, 5))) \
                              .withColumn("close", col("close").cast(DecimalType(10, 5))) \
                              .withColumn("volume", col("volume").cast(DecimalType(20, 5)))
@@ -156,7 +155,7 @@ def upload_time(df):
 
 def upload_price(df):
     df_filtered = df.select(['crypto_id','time_id','open','close','volume'])
-    logger.info(df_filtered.show())
+    logger.info(df_filtered.show(5))
     try:
         df_filtered.write \
         .format("jdbc") \
