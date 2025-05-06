@@ -4,7 +4,7 @@ Data engineering project featuring cryptocurrencies
 To build an end to end ETL pipeline that ingests cryptocurrency data from binance and build dashboards of different metrics for learning purposes
 ## Installation & Guide
 
-## Design & Implementation
+## Design & Implementation testing
 
 ### Schema
 ![DE-crypto-dbd](https://github.com/user-attachments/assets/70273554-28e1-4aec-b287-b2da7e524e50)
