@@ -68,7 +68,7 @@ logger.addHandler(handler)
 ]"""
 
 
-cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','DOGEUSDT']
+cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','XRPUSDT']
 
 def get_data_daily(symbol,interval,start_date,end_date):
     #start_date,end_date can be str or int form of utc
@@ -182,7 +182,7 @@ def minio_pipeline_daily(symbol):
     #implement try and except, api codes from minio and binance
     #implement schema check
 def main():
-    cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','DOGEUSDT']
+    cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','XRPUSDT']
     for symbol in cryptos:
         try:
             minio_pipeline_daily(symbol)

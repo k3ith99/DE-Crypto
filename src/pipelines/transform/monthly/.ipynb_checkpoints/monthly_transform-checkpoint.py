@@ -70,7 +70,7 @@ def parquet_to_df(client,crypto,schema):
     #read from parquet from minio and combines into dataframe
     try:
         logger.info("Trying to get info from minio")
-        objects = client.list_objects("binancedata/Daily", prefix=crypto, recursive=True)
+        objects = client.list_objects("binancedata", prefix=crypto, recursive=True)
         filenames = [obj.object_name for obj in objects]
         #logger.info(filenames)
         filenames = [f for f in filenames if "_SUCCESS" not in f]

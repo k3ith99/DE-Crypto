@@ -68,7 +68,7 @@ logger.addHandler(handler)
 ]"""
 
 
-cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','DOGEUSDT']
+cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','XRPUSDT']
 
 def get_data_monthly(symbol,interval,start_date,end_date):
     output = []
@@ -176,7 +176,7 @@ def minio_pipeline_monthly(symbol):
     #implement try and except, api codes from minio and binance
     #implement schema check
 def main():
-    cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','DOGEUSDT']
+    cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','XRPUSDT']
     for symbol in cryptos:
         try:
             minio_pipeline_monthly(symbol)
