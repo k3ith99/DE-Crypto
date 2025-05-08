@@ -1,7 +1,7 @@
 from minio import Minio
 from pyspark import SparkContext
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, to_timestamp, month, year,monotonically_increasing_id,row_number,concat, udf,lit
+from pyspark.sql.functions import col, to_timestamp, month, year,day,monotonically_increasing_id,row_number,concat, udf,lit
 from pyspark.sql.types import StructType, StructField, IntegerType, FloatType, LongType,TimestampNTZType,StringType,DecimalType
 from pyspark.sql.window import Window
 from pyspark.conf import SparkConf
@@ -69,10 +69,8 @@ schema = StructType([\
 def parquet_to_df(client,crypto,schema):
     #read from parquet from minio and combines into dataframe
     try:
-        logger.info("Trying to get info from minio")
-        objects = client.list_objects("binancedata/Daily", prefix=crypto, recursive=True)
+        objects = client.list_objects("binancedata", prefix=f"{crypto}/Daily", recursive=True)
         filenames = [obj.object_name for obj in objects]
-        #logger.info(filenames)
         filenames = [f for f in filenames if "_SUCCESS" not in f]
         df = spark.createDataFrame(data = [],schema = schema)
         for file in filenames:
@@ -107,6 +105,36 @@ df_crypto = spark.read \
     .option("driver", "org.postgresql.Driver")\
     .load()
 
+def parquet_to_df(client,crypto,schema):
+    #read from parquet from minio and combines into dataframe
+    try:
+        objects = client.list_objects("binancedata", prefix=f"{crypto}/Daily", recursive=True)
+        filenames = [obj.object_name for obj in objects]
+        filenames = [f for f in filenames if "_SUCCESS" not in f]
+        df = spark.createDataFrame(data = [],schema = schema)
+        for file in filenames:
+            df_parquet = spark.read.parquet(f"s3a://binancedata/{file}")
+            df = df.union(df_parquet)
+        return df
+    except Exception as e:
+        logger.error(f"error reading parquet from minio: {e}", stack_info=True, exc_info=True)
+
+def data_cleaning(df):
+    try:
+        df_null = df.na.drop(how = 'any',subset = ['datetime'])
+        df_renamed = df_null.withColumnsRenamed({'Open Price':'open',
+                                'Close Price':'close',
+                                'Volume':'volume'})
+        df_duplicated = df_renamed.dropDuplicates()
+        df_duplicated = df_duplicated.withColumn("open", col("open").cast(DecimalType(10, 5))) \
+                             .withColumn("close", col("close").cast(DecimalType(10, 5))) \
+                             .withColumn("volume", col("volume").cast(DecimalType(20, 5)))
+
+        return df_duplicated
+    except Exception as e:
+        logger.error(f"Error cleaning data:{e}",stack_info=True,exc_info=True)
+        
+
 def add_crypto_id(df,df_crypto,crypto,currency):
     try:
         df_crypto = df_crypto.withColumn("trading pair", concat(df_crypto.ticker, lit(currency)))
@@ -121,7 +149,7 @@ def add_crypto_id(df,df_crypto,crypto,currency):
 
 def generate_time_id(dt_value):
     #hard coded
-    ts = dt_value.strftime("%Y%m")
+    ts = dt_value.strftime("%Y%m%d")
     return int(ts)
 
 def add_time_id(generate_time_id,df):
@@ -136,8 +164,9 @@ def add_time_id(generate_time_id,df):
 def upload_time(df):
     #need to futureproof
     df_year = df.withColumn("year", year(df["datetime"]))
-    df_month = df_year.withColumn("month", month(df_year["datetime"]))
-    df_time_filtered = df_month.select(['time_id','datetime','year','month'])
+    df_month =df_year.withColumn("month", month(df_year["datetime"]))
+    df_day = df_month.withColumn("day", day(df_month["datetime"]))
+    df_time_filtered = df_day.select(['time_id','datetime','year','month','day'])
     df_time = df_time_filtered.withColumnRenamed('time_id','id')
     try:
         df_time.write \
@@ -179,6 +208,7 @@ def monthly_transform(symbol,currency):
     upload_time(df_time_id)
     upload_price(df_time_id)
     logger.info(f"Data successfully transformed and loaded for {symbol}")
+
 def main():
     cryptos = ['BTCUSDT','ETHUSDT','LTCUSDT','BNBUSDT','XRPUSDT']
     

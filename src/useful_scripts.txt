@@ -63,4 +63,7 @@ ENV PYTHONPATH=$SPARK_HOME/python/:$PYTHONPATH
 ENTRYPOINT ["tail", "-f", "/dev/null"]
 
 docker run -d -p 3000:3000 --name metabase metabase/metabase
-    
+    docker exec -it postgres1 psql -U postgres -c "CREATE DATABASE metabase;"
+pg_dump -U postgres -d metabase -f metabase_backup.sql
+./metabase_setup.sh
+chmod +x metabase_setup.sh
