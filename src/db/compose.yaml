@@ -34,8 +34,8 @@ services:
       - ../.env
     volumes:
       - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
-      - ./metabasedb_init.sql:/docker-entrypoint-initdb.d/metabasedb_init.sql
       - postgres_data:/var/lib/postgresql/data
+      - ./metabase_backup.sql:/metabase_backup.sql
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin1
