@@ -107,3 +107,134 @@ def upload_minio(symbol:str,bucket_name:str,timeframe:str,df:SparkDataFrame):
         return f"Successfully {symbol} {timeframe} uploaded to minio"
     except Exception as e:
         logger.error(e,stack_info = True, exc_info = True)
+
+def parquet_to_df(timeframe:str,crypto:str,schema:StructType) -> [SparkDataFrame]:
+    """
+    Converts parquet file from our minio object store to spark dataframe
+    Args:
+        crypto:cryptocurrency pair
+        schema:schema defined using StrucType from pyspark
+        timeframe: daily or monthly
+    """
+    try:
+        objects = client.list_objects("binancedata", prefix=f"{crypto}/{timeframe}", recursive=True)
+        filenames = [obj.object_name for obj in objects]
+        filenames = [f for f in filenames if "_SUCCESS" not in f]
+        df = spark.createDataFrame(data = [],schema = schema)
+        for file in filenames:
+            df_parquet = spark.read.parquet(f"s3a://binancedata/{file}")
+            df = df.union(df_parquet)
+        return df
+    except Exception as e:
+        logger.error(f"error reading parquet from minio: {e}", stack_info=True, exc_info=True)
+def data_cleaning(df:SparkDataFrame) -> [SparkDataFrame]:
+    """
+    drops nulls, renames and deduplicates dataframe
+    """
+    try:
+        df_null = df.na.drop(how = 'any',subset = ['datetime'])
+        df_renamed = df_null.withColumnsRenamed({'Open Price':'open',
+                                'Close Price':'close',
+                                'Volume':'volume'})
+        df_duplicated = df_renamed.dropDuplicates()
+        df_duplicated = df_duplicated.withColumn("open", col("open").cast(DecimalType(10, 5))) \
+                             .withColumn("close", col("close").cast(DecimalType(10, 5))) \
+                             .withColumn("volume", col("volume").cast(DecimalType(20, 5)))
+
+        return df_duplicated
+    except Exception as e:
+        logger.error(f"Error cleaning data:{e}",stack_info=True,exc_info=True)
+def add_crypto_id(df:SparkDataFrame,df_crypto:sparkDataFrame,crypto:str,currency:str):
+    """
+    Adds the crypto id from our crypto table in postgres to our spark dataframe as it is required in price table 
+    Args:
+        df: cleaned spark dataframe
+        df_crypto: dataframe version of crypto table
+        crypto: cryptocurrency pair such as XRPUSDT
+        currency: only USDT at the moment
+    """
+    try:
+        df_crypto = df_crypto.withColumn("trading pair", concat(df_crypto.ticker, lit(currency)))
+        #obtain the crypto from concatenating currency and ticker
+        df_crypto = df_crypto.filter(col("trading pair") == crypto)
+        crypto_id = df_crypto.collect()[0]['id']
+        df_id = df.withColumn("crypto_id",lit(crypto_id))
+        return df_id
+    except Exception as e:
+        logger.error(f"Error adding crypto id:{e}",stack_info=True,exc_info=True)
+    return df_id
+def add_time_id(df: DataFrame, timeframe: str) -> SparkDataFrame:
+    """
+    Adds a 'time_id' column to the DataFrame based on the 'datetime' column and given timeframe.
+    
+    Args:
+        df (DataFrame): Spark DataFrame that includes a 'datetime' column of TimestampType.
+        timeframe (str): Either 'daily' or 'monthly'. Used to format the datetime value.
+
+    Returns:
+        DataFrame: Spark DataFrame with a new 'time_id' column.
+    """
+    def generate_time_id(dt_value: datetime) -> int:
+        if dt_value is None:
+            return None
+        if timeframe == 'daily':
+            return int(dt_value.strftime('%Y%m%d'))
+        elif timeframe == 'monthly':
+            return int(dt_value.strftime('%Y%m'))
+        else:
+            raise ValueError(f"Unsupported timeframe: {timeframe}")
+
+    try:
+        time_id_udf = udf(generate_time_id, IntegerType())
+        return df.withColumn("time_id", time_id_udf(df["datetime"]))
+    except Exception as e:
+        logger.error(f"Error adding time_id column: {e}", exc_info=True)
+        return df
+def upload_time(timeframe:str,df:SparkDataFrame):
+    """
+    Uploads time to postgres
+    """
+    #need to futureproof
+    df_year = df.withColumn("year", year(df["datetime"]))
+    df_month =df_year.withColumn("month", month(df_year["datetime"]))
+    if timeframe == 'daily':
+        df_day = df_month.withColumn("day", day(df_month["datetime"]))
+        df_time_filtered = df_day.select(['time_id','datetime','year','month','day'])
+    elif timeframe == 'monthly':
+        df_time_filtered = df_day.select(['time_id','datetime','year','month'])
+    else:
+        raise ValueError(f"Unsupported timeframe: {timeframe}")
+    df_time = df_time_filtered.withColumnRenamed('time_id','id')
+    try:
+        df_time.write \
+        .format("jdbc") \
+        .option("url", "jdbc:postgresql://postgres1:5432/crypto") \
+        .option("dbtable", "time") \
+        .option("user", "postgres") \
+        .option("password", "postgres") \
+        .option("driver", "org.postgresql.Driver") \
+        .mode("append")\
+        .save()
+        logger.info("Successfully uploaded to time table")
+    except Exception as e:
+        logger.error(f"Error uploading to time table:{e}",stack_info=True,exc_info=True)
+def upload_price(df):
+    """
+    Uploads dataframe to price table
+
+    """
+    df_filtered = df.select(['crypto_id','time_id','open','close','volume'])
+    logger.info(df_filtered.show(5))
+    try:
+        df_filtered.write \
+        .format("jdbc") \
+        .option("url", "jdbc:postgresql://postgres1:5432/crypto") \
+        .option("dbtable", "price") \
+        .option("user", "postgres") \
+        .option("password", "postgres") \
+        .option("driver", "org.postgresql.Driver") \
+        .mode("append")\
+        .save()
+        logger.info("Successfully uploaded to price table")
+    except Exception as e:
+        logger.error(f"Error uploading to price table:{e}",stack_info=True,exc_info=True)
