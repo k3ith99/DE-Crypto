@@ -21,6 +21,7 @@ RUN apt-get update && \
 COPY ./requirements.txt .
 COPY ./minio_monthly.py .
 COPY ./main.env .
+COPY ./../../..//utils.py .
 
 
 # Install the dependencies from the requirements.txt file

@@ -1,7 +1,7 @@
 from minio import Minio
 from pyspark.sql import SparkSession, DataFrame as SparkDataFrame
 from pyspark.sql.functions import col, to_timestamp, month, year
-from pyspark.sql.types import IntegerType, FloatType, LongType, StructType, StructField
+from pyspark.sql.types import IntegerType, FloatType, LongType, StructType, StructField,
 from binance import Client
 from datetime import datetime, date
 from binance.helpers import date_to_milliseconds, interval_to_milliseconds
@@ -12,14 +12,6 @@ import time
 import logging
 from typing import Optional
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)  # set to debug to capture all levels
-if logger.hasHandlers():
-    logger.handlers.clear()
-logger.propagate = False
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-logger.addHandler(handler)
 
 spark = SparkSession.builder.appName("MyApp").getOrCreate()
 
@@ -28,6 +20,7 @@ def get_data(
     client_binance: Client,
     frequency: str,
     symbol: str,
+    interval: str,
     start_date: str,
     end_date: str,
 ) -> Optional[list]:
@@ -49,7 +42,7 @@ def get_data(
     try:
         while end_date_utc > start_date_utc:
             if frequency == "monthly":
-                data = client_binance.get_historical_klines(
+                data = client.get_historical_klines(
                     symbol=symbol,
                     interval="1M",
                     start_str=start_date_utc,
@@ -57,7 +50,7 @@ def get_data(
                     limit=1000,
                 )
             elif frequency == "daily":
-                data = client_binance.get_historical_klines(
+                data = client.get_historical_klines(
                     symbol=symbol,
                     interval="1d",
                     start_str=start_date_utc,
@@ -190,7 +183,7 @@ def data_cleaning(df: SparkDataFrame) -> [SparkDataFrame]:
 
 
 def add_crypto_id(
-    df: SparkDataFrame, df_crypto: SparkDataFrame, crypto: str, currency: str
+    df: SparkDataFrame, df_crypto: sparkDataFrame, crypto: str, currency: str
 ):
     """
     Adds the crypto id from our crypto table in postgres to our spark dataframe as it is required in price table
@@ -214,7 +207,7 @@ def add_crypto_id(
     return df_id
 
 
-def add_time_id(df: SparkDataFrame, timeframe: str) -> SparkDataFrame:
+def add_time_id(df: DataFrame, timeframe: str) -> SparkDataFrame:
     """
     Adds a 'time_id' column to the DataFrame based on the 'datetime' column and given timeframe.
 
