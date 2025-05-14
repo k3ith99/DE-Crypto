@@ -18,10 +18,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*do
 
 # Copy the requirements.txt file from the host machine to the container
-COPY ./requirements.txt .
+COPY ./../../shared/requirements.txt .
 COPY ./minio_monthly.py .
-COPY ./main.env .
-COPY ./../../..//utils.py .
+COPY ./../../shared/main.env .
+COPY ./../../shared/utils.py .
+COPY ./../../shared/main.env .
 
 
 # Install the dependencies from the requirements.txt file
