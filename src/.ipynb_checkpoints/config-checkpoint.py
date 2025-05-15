@@ -16,25 +16,18 @@ MINIO_USER = os.getenv("MINIO_ROOT_USER")
 MINIO_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
 client_binance = Client(API_KEY, SECRET_KEY)
 
-
 def spark_ingest():
     spark = SparkSession.builder.appName("CryptoIngest").getOrCreate()
     return spark
 
-
 def spark_transform():
-    spark = (
-        SparkSession.builder.appName("CryptoTransform")
-        .config(
-            "spark.jars",
-            "/usr/local/lib/python3.9/site-packages/pyspark/jars/postgresql-42.7.5.jar",
-        )
-        .getOrCreate()
-    )
+    spark = SparkSession.builder \
+    .appName("CryptoTransform") \
+    .config("spark.jars", "/usr/local/lib/python3.9/site-packages/pyspark/jars/postgresql-42.7.5.jar") \
+    .getOrCreate()
     return spark
 
-
-def configure_s3a(spark: SparkSession):
+def configure_s3a(spark:SparkSession):
     sc = spark.sparkContext
     sc._jsc.hadoopConfiguration().set(
         "fs.s3a.access.key", MINIO_USER
@@ -47,13 +40,13 @@ def configure_s3a(spark: SparkSession):
     sc._jsc.hadoopConfiguration().set("fs.s3a.connection.establish.timeout", "5000")
     sc._jsc.hadoopConfiguration().set("fs.s3a.connection.timeout", "10000")
 
-
 def custom_logger():
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)  # set to debug to capture all levels
+    logger.setLevel(logging.DEBUG) #set to debug to capture all levels
     if logger.hasHandlers():
         logger.handlers.clear()
     logger.propagate = False
     handler = logging.StreamHandler()
     handler.setLevel(logging.DEBUG)
     logger.addHandler(handler)
+    

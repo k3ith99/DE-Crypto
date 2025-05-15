@@ -1,8 +1,27 @@
 from minio import Minio
 from pyspark.sql import SparkSession, DataFrame as SparkDataFrame
 from pyspark.sql.functions import col, to_timestamp, month, year
-from pyspark.sql.types import IntegerType, FloatType, LongType, StructType, StructField,DecimalType,TimestampNTZType
-from pyspark.sql.functions import col, to_timestamp, month, year,day,monotonically_increasing_id,row_number,concat, udf,lit
+from pyspark.sql.types import (
+    IntegerType,
+    FloatType,
+    LongType,
+    StructType,
+    StructField,
+    DecimalType,
+    TimestampNTZType,
+)
+from pyspark.sql.functions import (
+    col,
+    to_timestamp,
+    month,
+    year,
+    day,
+    monotonically_increasing_id,
+    row_number,
+    concat,
+    udf,
+    lit,
+)
 from binance import Client
 from datetime import datetime, date
 from binance.helpers import date_to_milliseconds, interval_to_milliseconds
@@ -246,7 +265,7 @@ def add_time_id(df: SparkDataFrame, timeframe: str) -> SparkDataFrame:
         return df
 
 
-def upload_time(df: SparkDataFrame,timeframe: str):
+def upload_time(df: SparkDataFrame, timeframe: str):
     """
     Uploads time to postgres
     """
@@ -286,7 +305,7 @@ def upload_price(df):
 
     """
     df_filtered = df.select(["crypto_id", "time_id", "open", "close", "volume"])
-    #logger.info(df_filtered.show(5))
+    # logger.info(df_filtered.show(5))
     try:
         df_filtered.write.format("jdbc").option(
             "url", "jdbc:postgresql://postgres1:5432/crypto"

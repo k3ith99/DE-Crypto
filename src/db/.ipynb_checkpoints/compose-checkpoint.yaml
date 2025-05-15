@@ -1,0 +1,74 @@
+version: '1.0'
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio-main
+    restart: always
+    ports:
+      - 9000:9000
+      - 9001:9001
+    env_file:
+      - ../.env
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+  minio-client:
+    image: minio/mc
+    container_name: minio-client
+    ports:
+      - 9003:9003
+    env_file:
+      - ../.env
+    depends_on:
+      - minio
+    volumes:
+      - ./bucket-init.sh:/bucket-init.sh
+    entrypoint: /bin/sh -c "sleep 5 && /bucket-init.sh"
+  postgresql:
+    image: postgres:14.15
+    container_name: postgres1
+    restart: always
+    ports:
+      - 5432:5432
+    env_file:
+      - ../.env
+    volumes:
+      - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+      - postgres_data:/var/lib/postgresql/data
+      - ./metabase_backup.sql:/metabase_backup.sql
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin1
+    restart: always
+    ports:
+      - 5050:80
+    env_file:
+      - ../.env
+  metabase:
+    image: metabase/metabase:v0.53.10.4
+    container_name: metabase
+    restart: always
+    ports:
+      - 3000:3000
+    env_file:
+      - ../.env
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase              # Replace with your actual DB name if different
+      MB_DB_PORT: 5432
+      MB_DB_USER: postgres                # Replace with your actual DB user if different
+      MB_DB_PASS: postgres            # Replace with your actual DB password
+      MB_DB_HOST: postgresql
+    depends_on:
+      - postgresql
+    volumes:
+      - metabase_data:/metabase-data
+
+volumes:
+  postgres_data:
+  metabase_data:
+  minio_data:
+
+      
+
+    
