@@ -18,10 +18,10 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*do
 
 # Copy the requirements.txt file from the host machine to the container
-COPY ./requirements.txt .
-COPY ./monthly_transform.py .
-COPY ./main.env .
-COPY ./utils.py .
+COPY ./shared/requirements.txt .
+COPY ./transformation/daily/daily_transform.py .
+COPY ./shared/main.env .
+COPY ./shared/utils.py .
 
 
 # Install the dependencies from the requirements.txt file
@@ -34,4 +34,4 @@ RUN cd /usr/local/lib/python3.9/site-packages/pyspark/jars && \
     curl -O https://jdbc.postgresql.org/download/postgresql-42.7.5.jar
 
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
-CMD ["python", "monthly_transform.py"]
+CMD ["python", "daily_transform.py"]

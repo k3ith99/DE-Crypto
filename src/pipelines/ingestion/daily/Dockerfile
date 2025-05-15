@@ -18,9 +18,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*do
 
 # Copy the requirements.txt file from the host machine to the container
-COPY ./requirements.txt .
-COPY ./minio_daily.py .
-COPY ./main.env .
+#copy is based on build context, the root folder in a standard docker set up is the folder it is in but with build context this changes
+COPY ./shared/requirements.txt .
+COPY ./ingestion/daily/minio_daily.py .
+COPY ./shared/main.env .
+COPY ./shared/utils.py .
+
 
 
 # Install the dependencies from the requirements.txt file
