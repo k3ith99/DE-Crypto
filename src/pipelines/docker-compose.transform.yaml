@@ -1,0 +1,24 @@
+version: '3.9'
+services:
+  transformation-daily:
+    build:
+      context: .
+      dockerfile: transformation/daily/Dockerfile
+    container_name: transformation-daily
+    env_file:
+      - ./shared/main.env
+    networks: 
+      - db_default
+  transformation-monthly:
+    build:
+      context: .
+      dockerfile: transformation/monthly/Dockerfile
+    container_name: transformation-monthly
+    env_file:
+      - ./shared/main.env
+    networks: 
+      - db_default       
+networks:
+  db_default:
+    external: true
+
