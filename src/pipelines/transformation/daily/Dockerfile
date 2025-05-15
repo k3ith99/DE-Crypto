@@ -18,9 +18,10 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*do
 
 # Copy the requirements.txt file from the host machine to the container
-COPY ./requirements.txt .
-COPY ./daily_transform.py .
-COPY ./main.env .
+COPY ./shared/requirements.txt .
+COPY ./transformation/daily/daily_transform.py .
+COPY ./shared/main.env .
+COPY ./shared/utils.py .
 
 
 # Install the dependencies from the requirements.txt file
