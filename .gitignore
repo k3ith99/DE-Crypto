@@ -1,3 +1,20 @@
 .env*
 main.env
 ipynb_checkpoints
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Env & Build
+.env
+*.env
+*.egg-info/
+dist/
+build/
+
+# Pipenv
+Pipfile.lock
+**/.ipynb_checkpoints/
