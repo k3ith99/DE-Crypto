@@ -36,6 +36,20 @@ CREATE TABLE IF NOT EXISTS price (
   FOREIGN KEY (time_id) REFERENCES time (id),
   UNIQUE (crypto_id, time_id)  -- Optional: prevents duplicate entries for same crypto and time
 );
+CREATE TABLE IF NOT EXISTS calculations (
+  id SERIAL PRIMARY KEY,
+  price_id INT NOT NULL,
+  crypto_id INT NOT NULL,
+  time_id INT NOT NULL,
+  monthly_pct_change DECIMAL,
+  rolling_std_12_months DECIMAL,
+  sma DECIMAL,
+  ewm DECIMAL,
+  FOREIGN KEY (price_id) REFERENCES price (id),
+  FOREIGN KEY (time_id) REFERENCES time (id),
+  FOREIGN KEY (crypto_id) REFERENCES crypto (id),
+  UNIQUE (crypto_id, time_id)
+);
 
 
 INSERT INTO crypto (name, ticker)
