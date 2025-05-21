@@ -61,5 +61,6 @@ chmod + metabase_setup.sh
 - Use Airflow for orchestration
 - Run daily cron jobs
 - Include hourly data
+- Apply ETL testing
 
 
