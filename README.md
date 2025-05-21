@@ -25,9 +25,12 @@ chmod + metabase_setup.sh
 ```
 8. Run transformation pipeline:
 ``` docker-compose -f docker-compose.transform.yaml up --build -d ```
-9. Head to http://localhost:3000/admin/databases and enter the ip address of postgres1 container and save. You can obtain this using:
+9. Head to http://localhost:3000 and log in with:
+   * Username:crypto@outlook.com
+   * Password:King2030
+11. Head to http://localhost:3000/admin/databases and enter the ip address of postgres1 container and save. You can obtain this using:
 ``` docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres1 ```
-10. Once that is completed, view dashboards at http://localhost:3000/
+12. Once that is completed, view dashboards at http://localhost:3000/
 ## Design & Implementation
 ### Schema
 ![DE-crypto-dbd](https://github.com/user-attachments/assets/70273554-28e1-4aec-b287-b2da7e524e50)
