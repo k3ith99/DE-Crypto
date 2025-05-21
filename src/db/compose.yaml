@@ -8,7 +8,7 @@ services:
       - 9000:9000
       - 9001:9001
     env_file:
-      - ../.env
+      - ../pipelines/shared/main.env
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
@@ -18,7 +18,7 @@ services:
     ports:
       - 9003:9003
     env_file:
-      - ../.env
+      - ../pipelines/shared/main.env
     depends_on:
       - minio
     volumes:
@@ -31,7 +31,7 @@ services:
     ports:
       - 5432:5432
     env_file:
-      - ../.env
+      - ../pipelines/shared/main.env
     volumes:
       - ./db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
       - postgres_data:/var/lib/postgresql/data
@@ -43,7 +43,7 @@ services:
     ports:
       - 5050:80
     env_file:
-      - ../.env
+      - ../pipelines/shared/main.env
   metabase:
     image: metabase/metabase:v0.53.10.4
     container_name: metabase
@@ -51,7 +51,7 @@ services:
     ports:
       - 3000:3000
     env_file:
-      - ../.env
+      - ../pipelines/shared/main.env
     environment:
       MB_DB_TYPE: postgres
       MB_DB_DBNAME: metabase              # Replace with your actual DB name if different

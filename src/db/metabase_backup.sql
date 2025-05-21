@@ -5276,7 +5276,7 @@ COPY public.core_session (id, user_id, created_at, anti_csrf_token) FROM stdin;
 
 COPY public.core_user (id, email, first_name, last_name, password, password_salt, date_joined, last_login, is_superuser, is_active, reset_token, reset_triggered, is_qbnewb, login_attributes, updated_at, sso_source, locale, is_datasetnewb, settings, type, entity_id, deactivated_at) FROM stdin;
 13371338	internal@metabase.com	Metabase	Internal	$2a$10$Eh4hRoJze0aGr82k3mNl9efbdMrCFxk.UNBiWPai4zMkPxyOqMNdG	d8da56ee-60a2-488a-8d0d-b0d10878cf32	2025-05-02 16:58:28.93224+00	\N	f	f	\N	\N	t	\N	\N	\N	\N	t	\N	internal	\N	\N
-1	hamza_saleh1999@hotmail.com	hamza	saleh	$2a$10$GJEkyCrQuS8gvI4aVx6UwO/FMKzHOCWdE0SXekLsTs/.YlVc8Mm9m	a72a8660-ce74-4821-8328-6a3b8df7a5f0	2025-05-02 17:11:10.362111+00	2025-05-02 17:11:10.551021+00	t	t	\N	\N	f	\N	2025-05-04 23:18:43.586823+00	\N	\N	t	{"last-acknowledged-version":"v0.53.10.4","last-used-native-database-id":"2"}	personal	UB9zoqAiRjMtcKtVVvttV	\N
+1	crypto@outlook.com	hamza	saleh	$2a$10$GJEkyCrQuS8gvI4aVx6UwO/FMKzHOCWdE0SXekLsTs/.YlVc8Mm9m	a72a8660-ce74-4821-8328-6a3b8df7a5f0	2025-05-02 17:11:10.362111+00	2025-05-02 17:11:10.551021+00	t	t	\N	\N	f	\N	2025-05-04 23:18:43.586823+00	\N	\N	t	{"last-acknowledged-version":"v0.53.10.4","last-used-native-database-id":"2"}	personal	UB9zoqAiRjMtcKtVVvttV	\N
 2	api-key-user-9231e7f5-7b85-4a52-9295-cba358df7aad@api-key.invalid	test-key		$2a$10$MUxWdrA3oHQ5LdOMLqOPFOt36Zh7qDjmjHCGy3.Q9aqLvvy1AUS1C	fdda3920-3833-4889-bb8d-3a599e172b1e	2025-05-07 15:24:59.172048+00	\N	t	t	\N	\N	t	\N	2025-05-07 15:24:59.172048+00	\N	\N	t	{"last-acknowledged-version":"v0.53.10.4"}	api-key	DgaAGWB0eH20crVTZ3p62	\N
 \.
 
@@ -7609,7 +7609,7 @@ site-url	http://localhost:3000
 analytics-uuid	8f7dc748-72be-476b-83de-9b302a970e24
 instance-creation	2025-05-02T16:58:28.93224Z
 site-name	hiddaha
-admin-email	hamza_saleh1999@hotmail.com
+admin-email	crypto@outlook.com
 site-locale	en
 site-uuid	0e365c41-6e38-483e-973b-3d17819d0018
 anon-tracking-enabled	false
