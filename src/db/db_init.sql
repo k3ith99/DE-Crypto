@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS calculations (
   monthly_pct_change DECIMAL,
   rolling_std_12_months DECIMAL,
   sma DECIMAL,
-  ewm DECIMAL,
+  ema DECIMAL,
   FOREIGN KEY (price_id) REFERENCES price (id),
   FOREIGN KEY (time_id) REFERENCES time (id),
   FOREIGN KEY (crypto_id) REFERENCES crypto (id),

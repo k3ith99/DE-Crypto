@@ -16,6 +16,7 @@ pycodestyle-magic = "*"
 flake8 = "*"
 pyarrow = "*"
 numpy = "==1.26.4"
+matplotlib = "*"
 
 [dev-packages]
 
