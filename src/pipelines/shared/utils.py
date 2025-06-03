@@ -32,6 +32,7 @@ import time
 from datetime import datetime, date
 import logging
 from typing import Optional
+import pyspark.pandas as ps
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)  # set to debug to capture all levels
@@ -317,6 +318,62 @@ def upload_price(df):
             "append"
         ).save()
         logger.info("Successfully uploaded to price table")
+    except Exception as e:
+        logger.error(
+            f"Error uploading to price table:{e}", stack_info=True, exc_info=True
+        )
+def calculations(frequency:str,df):
+    '''
+    Converts spark dataframe to pyspark pandas dataframe and calculates all fields required by calculations table
+    '''
+    ps.set_option("compute.ops_on_diff_frames", True)
+    window = None
+    window_ma = None
+    if frequency == 'daily':
+        window = 365
+        window_ma = 50
+    elif frequency == 'monthly':
+        window_ma = 12
+        window = 12
+    
+    try:
+        psdf = df.pandas_api()
+        psdf_sorted = psdf.sort_values(by='datetime').reset_index(drop = True)
+        psdf_sorted['ema'] = psdf_sorted['close'].ewm(min_periods = window_ma,ignore_na = True,span = 6).mean()
+        psdf_sorted = psdf_sorted.sort_values(by='datetime').reset_index(drop = True)
+        col_name = f"{frequency}_pct_change"
+        psdf_sorted[col_name] = psdf_sorted['close'].pct_change().round(3)
+        std = psdf_sorted[col_name].rolling(window=window).std()
+        psdf_sorted['rolling_std'] = std
+        sma = psdf_sorted['close'].rolling(window=window_ma).mean()
+        psdf_sorted['sma'] = sma
+        vroc = (psdf_sorted['volume'] - psdf_sorted['volume'].shift(int(window / 2)))/ psdf_sorted['volume'].shift(int(window / 2))
+        psdf_sorted['vroc'] = vroc
+        psdf_sorted = psdf_sorted.sort_values(by='datetime').reset_index(drop = True)
+        df = psdf_sorted.to_spark()
+        return df
+    except Exception as e:
+        logger.error(
+            f"Error running calculations:{e}", stack_info=True, exc_info=True
+        )
+def upload_calculations(df):
+    """
+    Uploads dataframe to price table
+
+    """
+    df_filtered = df.select(["crypto_id", "time_id", "ema", "sma","vroc","monthly_oct_change","std"])
+    # logger.info(df_filtered.show(5))
+    try:
+        df_filtered.write.format("jdbc").option(
+            "url", "jdbc:postgresql://postgres1:5432/crypto"
+        ).option("dbtable", "calculations").option("user", "postgres").option(
+            "password", "postgres"
+        ).option(
+            "driver", "org.postgresql.Driver"
+        ).mode(
+            "append"
+        ).save()
+        logger.info("Successfully uploaded to calculations table")
     except Exception as e:
         logger.error(
             f"Error uploading to price table:{e}", stack_info=True, exc_info=True
