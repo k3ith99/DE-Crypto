@@ -2,7 +2,7 @@
 
 
 ## Project goal
-To build an end to end ETL pipeline that ingests cryptocurrency data from binance and build dashboards of different metrics for learning purposes
+To build an end to end ETL pipeline that ingests cryptocurrency data from binance and visualises different metrics for learning and experimentation
 
 ## Installation & Usage
 ### Prerequisites
@@ -13,7 +13,14 @@ Ensure pipenv and docker are installed
 2. Install dependencies using pipenv install and enter using pipenv shell
 3. Create main.env files in shared folder and db folder
 5. cd src/db and run docker-compose up to start infrastructure (minio,postgres and metabase)
-6. Apply permissions and setup dashboard using:
+After startup, access services at:
+MinIO: http://localhost:9000
+Username: root
+Password: minioadmin
+PgAdmin: http://localhost:5050
+Username: postgres
+Password: postgres
+7. Apply permissions and setup dashboard using:
 ```
 chmod + metabase_setup.sh
 ./metabase_setup.sh
@@ -38,7 +45,7 @@ chmod + metabase_setup.sh
 ### Technologies
 - Minio as object store for raw data
 - Binance API as the data source
-- Postgres - as a data wareshouse
+- Postgres - as a data warehouse
 - Metabase for visualisation dashboards
 - Spark for transformation
 - Docker for containerisation and orchestration
