@@ -15,7 +15,7 @@ Ensure pipenv and docker are installed
 5. cd src/db and run docker-compose up to start infrastructure (minio,postgres and metabase)
 After startup, access services at:
 * MinIO: http://localhost:9000
-Username: root
++ Username: root
 Password: minioadmin
 * PgAdmin: http://localhost:5050
 Username: postgres
