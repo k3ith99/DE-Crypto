@@ -341,10 +341,9 @@ def calculations(frequency:str,df):
         psdf_sorted = psdf.sort_values(by='datetime').reset_index(drop = True)
         psdf_sorted['ema'] = psdf_sorted['close'].ewm(min_periods = window_ma,ignore_na = True,span = 6).mean()
         psdf_sorted = psdf_sorted.sort_values(by='datetime').reset_index(drop = True)
-        col_name = f"{frequency}_pct_change"
-        psdf_sorted[col_name] = psdf_sorted['close'].pct_change().round(3)
-        std = psdf_sorted[col_name].rolling(window=window).std()
-        psdf_sorted['rolling_std'] = std
+        psdf_sorted["pct_change"] = psdf_sorted['close'].pct_change().round(3)
+        std = psdf_sorted["pct_change"].rolling(window=window).std()
+        psdf_sorted['std'] = std
         sma = psdf_sorted['close'].rolling(window=window_ma).mean()
         psdf_sorted['sma'] = sma
         vroc = (psdf_sorted['volume'] - psdf_sorted['volume'].shift(int(window / 2)))/ psdf_sorted['volume'].shift(int(window / 2))
@@ -361,7 +360,7 @@ def upload_calculations(df):
     Uploads dataframe to price table
 
     """
-    df_filtered = df.select(["crypto_id", "time_id", "ema", "sma","vroc","monthly_oct_change","std"])
+    df_filtered = df.select(["crypto_id", "time_id", "ema", "sma","vroc","pct_change","std"])
     # logger.info(df_filtered.show(5))
     try:
         df_filtered.write.format("jdbc").option(
@@ -376,5 +375,5 @@ def upload_calculations(df):
         logger.info("Successfully uploaded to calculations table")
     except Exception as e:
         logger.error(
-            f"Error uploading to price table:{e}", stack_info=True, exc_info=True
+            f"Error uploading to calculations table:{e}", stack_info=True, exc_info=True
         )

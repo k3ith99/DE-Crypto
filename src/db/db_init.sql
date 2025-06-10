@@ -38,14 +38,13 @@ CREATE TABLE IF NOT EXISTS price (
 );
 CREATE TABLE IF NOT EXISTS calculations (
   id SERIAL PRIMARY KEY,
-  price_id INT NOT NULL,
   crypto_id INT NOT NULL,
   time_id INT NOT NULL,
-  monthly_pct_change DECIMAL,
-  rolling_std_12_months DECIMAL,
+  pct_change DECIMAL,
+  std DECIMAL,
   sma DECIMAL,
   ema DECIMAL,
-  FOREIGN KEY (price_id) REFERENCES price (id),
+  vroc DECIMAL,
   FOREIGN KEY (time_id) REFERENCES time (id),
   FOREIGN KEY (crypto_id) REFERENCES crypto (id),
   UNIQUE (crypto_id, time_id)
