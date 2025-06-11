@@ -98,6 +98,7 @@ def daily_transform(symbol, currency):
     # logger.info(df_time_id.show())
     upload_time(df_time_id, "daily")
     upload_price(df_time_id)
+    upload_calculations(df_time_id)
 
 
 def main():
