@@ -32,13 +32,13 @@ chmod + metabase_setup.sh
 ```
 8. Run transformation pipeline:
 ``` docker-compose -f docker-compose.transform.yaml up --build -d ```
-9. Head to http://localhost:3000 and log in with:
+10. Head to http://localhost:3000 and log in with:
    * Username:crypto@outlook.com
    * Password:King2030
 11. Head to http://localhost:3000/admin/databases and enter the ip address of postgres1 container and save. You can obtain this using:
 ``` docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres1 ```
 12. Once that is completed, view dashboards at http://localhost:3000/
-13. There are also daily and monthly dags.
+13. Start airflow with ``` Astro dev start ```
 ## Design & Implementation
 ### Schema
 ![image](https://github.com/user-attachments/assets/077b4c48-89f3-42ea-9787-53dc895f116b)
