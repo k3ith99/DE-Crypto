@@ -13,9 +13,13 @@ RUN apt-get update && \
       openjdk-11-jdk \
       build-essential \
       software-properties-common \
-      ssh && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*do
+      ssh \
+      libssl-dev \
+      libffi-dev \
+      ca-certificates \
+      && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 
 # Copy the requirements.txt file from the host machine to the container
 COPY ./shared/requirements.txt .
