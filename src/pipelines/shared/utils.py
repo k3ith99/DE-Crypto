@@ -155,7 +155,7 @@ def upload_minio(symbol: str, bucket_name: str, timeframe: str, df: SparkDataFra
         timeframe: daily or monthly at the moment
     """
     try:
-        df.write.mode("append").partitionBy("year", "month").parquet(
+        df.write.mode("overwrite").partitionBy("year", "month").parquet(
             f"s3a://{bucket_name}/{symbol}/{timeframe}"
         )
         return f"Successfully {symbol} {timeframe} uploaded to minio"
