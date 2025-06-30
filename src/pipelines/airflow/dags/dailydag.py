@@ -8,6 +8,7 @@ from airflow.providers.docker.operators.docker import DockerOperator
     schedule = "@daily",
     start_date = datetime(2025,6,25),
     catchup = True,
+    is_paused_upon_creation=True,
     default_args = {
         "retries":1,
     }
