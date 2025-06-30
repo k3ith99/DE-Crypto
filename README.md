@@ -64,13 +64,12 @@ chmod + metabase_setup.sh
  - Metabase
  - Binance API
  - Postgresdb
+ - Airflow
 ## Improvements/Future features
 - Include calculated metrics such as beta, moving averages and STD
 - Use sql for transformations instead of spark
 - Apply financial models such as CAPM
 - Apply AI & ML models
-- Use Airflow for orchestration
-- Run daily cron jobs
 - Include hourly data
 - Apply ETL testing
 
