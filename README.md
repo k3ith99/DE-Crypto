@@ -40,7 +40,8 @@ chmod + metabase_setup.sh
 12. Once that is completed, view dashboards at http://localhost:3000/
 ## Design & Implementation
 ### Schema
-![DE-crypto-dbd](https://github.com/user-attachments/assets/70273554-28e1-4aec-b287-b2da7e524e50)
+![image](https://github.com/user-attachments/assets/077b4c48-89f3-42ea-9787-53dc895f116b)
+
 
 ### Technologies
 - Minio as object store for raw data

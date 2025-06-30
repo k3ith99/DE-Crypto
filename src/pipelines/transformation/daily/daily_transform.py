@@ -9,10 +9,13 @@ from utils import (
     add_time_id,
     upload_time,
     upload_price,
+    calculations,
+    upload_calculations
 )
 from binance import Client
 import os
 from dotenv import load_dotenv, dotenv_values
+import pyspark.pandas as ps
 import logging
 
 load_dotenv(dotenv_path="./main.env", override=True)
@@ -89,11 +92,13 @@ def daily_transform(symbol, currency):
         client_minio=client_minio, timeframe="daily", crypto=symbol, schema=schema
     )
     df_cleaned = data_cleaning(df)
-    df_id = add_crypto_id(df_cleaned, df_crypto, symbol, currency)
+    df_calculations = calculations("daily",df_cleaned)
+    df_id = add_crypto_id(df_calculations, df_crypto, symbol, currency)
     df_time_id = add_time_id(df_id, "daily")
     # logger.info(df_time_id.show())
     upload_time(df_time_id, "daily")
     upload_price(df_time_id)
+    upload_calculations(df_time_id)
 
 
 def main():
