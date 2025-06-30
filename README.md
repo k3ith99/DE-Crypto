@@ -38,6 +38,7 @@ chmod + metabase_setup.sh
 11. Head to http://localhost:3000/admin/databases and enter the ip address of postgres1 container and save. You can obtain this using:
 ``` docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres1 ```
 12. Once that is completed, view dashboards at http://localhost:3000/
+13. There are also daily and monthly dags.
 ## Design & Implementation
 ### Schema
 ![image](https://github.com/user-attachments/assets/077b4c48-89f3-42ea-9787-53dc895f116b)
