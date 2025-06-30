@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 pandas = "*"
 pyspark = "*"
-numpy = "*"
 pep8 = "*"
 requests = "*"
 jupyterlab = "*"
@@ -15,6 +14,9 @@ jupyter-black = "*"
 pycodestyle = "*"
 pycodestyle-magic = "*"
 flake8 = "*"
+pyarrow = "*"
+numpy = "==1.26.4"
+matplotlib = "*"
 
 [dev-packages]
 
